@@ -1,0 +1,18 @@
+{
+    "NCC":{
+        "Konfigreread":"[put here]",
+        "Adresse":"195.191.252.239",
+	"Port":"21",
+        "Timeout":"3"
+    },
+    "Temperatur":{
+        "TimeDelta":"10"
+    },
+    "CPU":{
+         "TimeDelta":"1"
+    },
+    "Client":{
+        "Hostname":"Node1",
+        "Zusatzinfo":"na"
+    }
+}

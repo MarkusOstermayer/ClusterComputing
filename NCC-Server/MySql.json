@@ -1,0 +1,10 @@
+{
+    "Database":{
+        "Host":"127.0.0.1",
+        "Username":"root",
+        "Password":"markusostermayer1998",
+    },
+    "HardwareData":{
+        "maxDump":"10"
+    }
+}
