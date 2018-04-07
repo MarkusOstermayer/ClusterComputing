@@ -1,10 +1,10 @@
 <?php
 
     return array(
-        'host'     => 'localhost',
-        'username' => 'root',
-        'password' => 'markusostermayer1998',
-        'database' => 'Webside',
+        'host'     => 'domain',
+        'username' => 'login',
+        'password' => 'password',
+        'database' => 'database',
     );
 
 ?>
