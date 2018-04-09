@@ -57,59 +57,83 @@ desired effect
     
 <php>
 <?php
+   //including config file with login information
+//_______________________________________________________________________________________
+$config = include('config.php');
+//_______________________________________________________________________________________
+
+    
     session_start();
-    $pdo = new PDO('mysql:host = localhost; dbname=Webside', 'root', 'markusostermayer1998');
+    $pdo = new PDO('mysql:host='.$config['host'].';dbname='.$config['database'].'', ''.$config['username'].'', ''.$config['password'].'');
 
 
+//Generte and check Cookies for login
+//-------------------------------------------------------------------------------------------------
     function random_string() {
-     if(function_exists('random_bytes')) {
-     $bytes = random_bytes(16);
-     $str = bin2hex($bytes); 
-     } else if(function_exists('openssl_random_pseudo_bytes')) {
-     $bytes = openssl_random_pseudo_bytes(16);
-     $str = bin2hex($bytes); 
-     } else if(function_exists('mcrypt_create_iv')) {
-     $bytes = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
-     $str = bin2hex($bytes); 
-     } else {
-     //Bitte euer_geheim_string durch einen zufälligen String mit >12 Zeichen austauschen
-     $str = md5(uniqid('euer_geheimer_string', true));
-     } 
-     return $str;
+        
+        if(function_exists('random_bytes')) {
+             $bytes = random_bytes(16);
+             $str = bin2hex($bytes); 
+        } 
+        else if(function_exists('openssl_random_pseudo_bytes')) {
+             $bytes = openssl_random_pseudo_bytes(16);
+             $str = bin2hex($bytes); 
+        } 
+        else if(function_exists('mcrypt_create_iv')) {
+             $bytes = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+             $str = bin2hex($bytes); 
+        } 
+        else {
+            //Bitte euer_geheim_string durch einen zufälligen String mit >12 Zeichen austauschen
+            $str = md5(uniqid('theveryspecialstring1029384756', true));
+        } 
+        return $str;
     }
-
-    //Überprüfe auf den 'Angemeldet bleiben'-Cookie
+//-----------------------------------------------------------------------------------------
+    //check for 'signed in' - Cookie
     if(!isset($_SESSION['userid']) && isset($_COOKIE['identifier']) && isset($_COOKIE['securitytoken'])) {
-     $identifier = $_COOKIE['identifier'];
-     $securitytoken = $_COOKIE['securitytoken'];
-     $statement = $pdo->prepare("SELECT * FROM login WHERE identifier = '". $identifier ."'");
-     $result = $statement->execute(array($identifier));
-     $securitytoken_row = $statement->fetch();
+        
+        $identifier = $_COOKIE['identifier'];
+        $securitytoken = $_COOKIE['securitytoken'];
+        $statement = $pdo->prepare("SELECT * FROM login WHERE identifier = '". $identifier ."'");
+        $result = $statement->execute(array($identifier));
+        $securitytoken_row = $statement->fetch();
 
-     if(sha1($securitytoken) !== $securitytoken_row['securitytoken']) {
-     die('Ein vermutlich gestohlener Security Token wurde identifiziert');
-     } else { //Token war korrekt 
-     //Setze neuen Token
-     $neuer_securitytoken = random_string(); 
-     $insert = $pdo->prepare("UPDATE login SET securitytoken = :securitytoken WHERE identifier = :identifier");
-     $insert->execute(array('securitytoken' => sha1($neuer_securitytoken), 'identifier' => $identifier));
-     setcookie("identifier",$identifier,time()+(60)); 
-     setcookie("securitytoken",$neuer_securitytoken,time()+(60));
+        if(sha1($securitytoken) !== $securitytoken_row['securitytoken']) {
+            die('stolen security token');
+        } 
+        else {//token correct
+            //set new token
+            $new_securitytoken = random_string(); 
+            $insert = $pdo->prepare("UPDATE login SET securitytoken = :securitytoken WHERE identifier = :identifier");
+            $insert->execute(array('securitytoken' => sha1($new_securitytoken), 'identifier' => $identifier));
+            setcookie("identifier",$identifier,time()+(60)); 
+            setcookie("securitytoken",$new_securitytoken,time()+(60));
 
-     //Logge den Benutzer ein
-     $_SESSION['userid'] = $securitytoken_row['user_id'];
-     }
+            //log user in
+            $_SESSION['userid'] = $securitytoken_row['user_id'];
+        }
     }
-
+//-----------------------------------------------------------------------------------------
     if(!isset($_SESSION['userid'])) {
-     die(header('Location: http://markuspi.bulme.at/admin/login.html'));
+        die(header('Location: http://markuspi.bulme.at/admin/login.html'));
     }
 
     $userid = $_SESSION['userid'];
-    
-    
-    
-    $connect = mysqli_connect("localhost", "root", "markusostermayer1998", "Webside");
+  
+//-------------------------------------------------------------------------------------------------
+   
+
+
+
+// connecting and logging in to the database
+//_______________________________________________________________________________________
+$connect = mysqli_connect ($config['host'], 
+                           $config['username'], 
+                           $config['password'], 
+                           $config['database']);
+//_______________________________________________________________________________________
+ 
     
     $query = "SELECT id, node, time_stamp, status, IPaddress FROM ClientData WHERE node = 'Node 1'";
     $result = mysqli_query($connect, $query);
