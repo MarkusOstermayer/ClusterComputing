@@ -1,4 +1,4 @@
-polfrom __future__ import print_function
+from __future__ import print_function
 from mpi4py import MPI
 import keras
 from keras.datasets import mnist
